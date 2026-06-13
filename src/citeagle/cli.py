@@ -11,7 +11,13 @@ from .bluesky import build_post_text, should_post, post_to_bluesky
 app = typer.Typer(help="citeagle — eagle-eyed citation checker for scholarly preprints.")
 
 
-@app.command()
+@app.command("version", help="Print citeagle version and exit.")
+def version_cmd() -> None:
+    from . import __version__
+    typer.echo(f"citeagle {__version__}")
+
+
+@app.command("check")
 def check(
     input_arg: str = typer.Argument(..., metavar="INPUT", help=".bib | .txt | DOI | URL"),
     pdf: Path | None = typer.Option(None, "--pdf", help="PDF to extract references from"),

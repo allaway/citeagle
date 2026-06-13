@@ -34,7 +34,7 @@ def test_cli_check_bibtex(tmp_path):
         }
     }
     with patch("citeagle.classifier.lookup_doi_crossref", return_value=cr_data):
-        result = runner.invoke(app, [str(bib_file), "--out", str(out_dir), "--no-cache"])
+        result = runner.invoke(app, ["check", str(bib_file), "--out", str(out_dir), "--no-cache"])
 
     assert result.exit_code == 0, result.output
     assert (out_dir / "report.json").exists()
@@ -59,7 +59,7 @@ def test_cli_no_post_by_default(tmp_path):
     with patch("citeagle.classifier.lookup_doi_crossref", return_value=None), \
          patch("citeagle.classifier.lookup_doi_openalex", return_value=None), \
          patch("citeagle.bluesky.post_to_bluesky") as mock_post:
-        result = runner.invoke(app, [str(bib_file), "--out", str(out_dir), "--no-cache"])
+        result = runner.invoke(app, ["check", str(bib_file), "--out", str(out_dir), "--no-cache"])
 
     # post_to_bluesky may be called in dry-run mode (that's fine), but atproto Client.send_post must NOT be called
     # The important thing is exit code 0 and no real posting
