@@ -8,11 +8,17 @@ from ..config import USER_AGENT
 _DOI_RE = re.compile(r"10\.\d{4,9}/[^\s,;\"'\]>]+", re.IGNORECASE)
 
 
+_PLACEHOLDER_AUTHORS = {"author unknown", "unknown", "et al", "et al."}
+
+
 def _clean_doi(doi: str | None) -> str | None:
     if not doi:
         return None
     doi = re.sub(r"^https?://(dx\.)?doi\.org/", "", doi.strip(), flags=re.IGNORECASE)
-    return doi.rstrip(".,;") or None
+    doi = doi.rstrip(".,;")
+    # Strip trailing version suffix (e.g. "10.1101/2022.06.18.496679v2" → without "v2")
+    doi = re.sub(r"v\d+$", "", doi)
+    return doi or None
 
 
 def _to_reference(epmc_ref: dict) -> Reference:
@@ -24,13 +30,15 @@ def _to_reference(epmc_ref: dict) -> Reference:
     authors = [a.get("lastName", a.get("fullName", "")).strip() for a in author_list if a]
     authors = [a for a in authors if a]
 
-    # fallback: parse from authorString
+    # fallback: parse from authorString, skipping placeholder values
     if not authors:
         author_str = epmc_ref.get("authorString", "")
-        for name in re.split(r",\s*|\s+and\s+", author_str):
-            n = name.strip()
-            if n:
-                authors.append(n.split()[-1])
+        if author_str.lower().strip() not in _PLACEHOLDER_AUTHORS:
+            for name in re.split(r",\s*|\s+and\s+", author_str):
+                n = name.strip()
+                surname = n.split()[-1] if n else ""
+                if surname and surname.lower() not in _PLACEHOLDER_AUTHORS:
+                    authors.append(surname)
 
     year_str = epmc_ref.get("pubYear") or epmc_ref.get("year") or ""
     year: int | None = None

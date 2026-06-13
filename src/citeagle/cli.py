@@ -63,8 +63,7 @@ def check(
         import re
         doi = re.sub(r"^https?://(dx\.)?doi\.org/", "", doi)
         doi = re.sub(r"^https?://www\.(biorxiv|medrxiv)\.org/content/", "", doi)
-        doi = doi.rstrip("/v1 /v2 /v3 /v4 /v5".split())
-        # strip version suffixes
+        doi = doi.rstrip("/")
         doi = re.sub(r"v\d+$", "", doi)
 
         typer.echo(f"Fetching references for DOI: {doi}")

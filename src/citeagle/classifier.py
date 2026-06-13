@@ -118,9 +118,23 @@ def _classify_with_doi(ref: Reference, cache: Cache, use_semantic: bool) -> Verd
 
     # We have a match — compare
     source = match_data.get("_source", "crossref")
-    sim = _title_sim(ref.title, match_data.get("title"))
     author_ok = _author_consistent(ref.authors, match_data.get("authors", []))
     year_ok = _year_consistent(ref.year, match_data.get("year"))
+
+    # If the reference has no title we cannot compare titles — DOI resolved, so
+    # it's not fabricated, but we can't confirm it's the right paper either.
+    if not ref.title:
+        return Verdict(
+            reference=ref,
+            status="needs_review",
+            matched_title=match_data.get("title"),
+            matched_doi=match_data.get("doi", doi),
+            title_similarity=0.0,
+            source=source,
+            notes=f"DOI resolves to '{match_data.get('title')}' but reference has no title to compare.",
+        )
+
+    sim = _title_sim(ref.title, match_data.get("title"))
 
     if sim >= TITLE_SIM_VERIFIED:
         if author_ok and year_ok:
