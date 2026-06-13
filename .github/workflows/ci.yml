@@ -29,7 +29,7 @@ jobs:
         run: pytest tests/ -v --tb=short
 
   dry-run:
-    name: dry-run check (sample .bib)
+    name: dry-run check (real preprint)
     runs-on: ubuntu-latest
     needs: test
 
@@ -44,30 +44,11 @@ jobs:
       - name: Install
         run: pip install -e .
 
-      - name: Write sample BibTeX
-        run: |
-          cat > /tmp/sample.bib << 'EOF'
-          @article{attention2017,
-            author  = {Vaswani, Ashish and Shazeer, Noam and Parmar, Niki and Uszkoreit, Jakob and Jones, Llion and Gomez, Aidan N and Kaiser, {\L}ukasz and Polosukhin, Illia},
-            title   = {Attention Is All You Need},
-            journal = {Advances in Neural Information Processing Systems},
-            year    = {2017},
-            doi     = {10.48550/arXiv.1706.03762},
-          }
-          @article{fakepaper2099,
-            author  = {Nobody, A},
-            title   = {Completely fabricated paper that does not exist},
-            journal = {Journal of Imaginary Science},
-            year    = {2099},
-            doi     = {10.9999/fake.doi.does.not.exist},
-          }
-          EOF
-
       - name: Run citeagle dry-run
         env:
           CITEAGLE_CONTACT_EMAIL: ci@github-actions.invalid
         run: |
-          citeagle check /tmp/sample.bib --out /tmp/citeagle-out --no-cache
+          citeagle check 10.1101/2025.10.20.683396 --out /tmp/citeagle-out --no-cache
 
       - name: Show report
         run: |
