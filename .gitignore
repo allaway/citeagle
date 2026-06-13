@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.env
+.venv/
+venv/
+out/
+.citeagle_cache.json
+*.json.bak
+.pytest_cache/
+.mypy_cache/
